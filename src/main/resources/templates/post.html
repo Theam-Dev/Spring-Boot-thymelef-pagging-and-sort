@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-sm bg-light navbar-light">
+    <ul class="navbar-nav">
+        <li class="nav-item active">
+            <a class="nav-link" href="#">Thymeleaf Pagination and Sorting</a>
+        </li>
+
+    </ul>
+</nav>
+<br>
+
+<div class="container">
+    <div class="my-3">
+        <form th:action="@{/}" id="searchForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex flex-row">
+                        <input id="keyword" type="search" name="keyword" th:value="${keyword}" required class="form-control pr-2"
+                               placeholder="Enter keyword">
+                        <button type="submit" class="btn btn-secondary">Search</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex flex-row">
+                        <p class="input-group-text" for="pageSize">Items per page:</p>
+
+                        <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()" class="form-control"
+                                id="pageSize">
+                            <option th:each="s : ${ {5, 10, 15,20} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="col-md-2">
+                    <button id="btnClear" class="btn btn-info">Clear</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div th:if="${post.size() > 0}">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th th:replace="fragments/sorting :: sorting('id','Id')"></th>
+                <th th:replace="fragments/sorting :: sorting('title','Title')"></th>
+                <th th:replace="fragments/sorting :: sorting('body','Body')"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="posts : ${post}">
+                <th scope="row">[[${posts.id}]]</th>
+                <td>[[${posts.title}]]</td>
+                <td>[[${posts.body}]]</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Pagination" th:if="${totalPages > 0}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a th:replace="fragments/paging :: paging(1, '<<', 'First Page')"></a>
+            </li>
+            <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a th:replace="fragments/paging :: paging(${currentPage - 1}, 'Prev', 'Previous Page')"></a>
+            </li>
+            <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                <a class="page-link" href="#">...</a>
+            </li>
+            <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 2 : 1, currentPage + 2 < totalPages ? currentPage + 2 : totalPages)}">
+                <a th:replace="fragments/paging :: paging(${page}, ${page}, 'Page ' + ${page})"></a>
+            </li>
+            <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                <a class="page-link" href="#">...</a>
+            </li>
+            <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a th:replace="fragments/paging :: paging(${currentPage + 1},'Next', 'Next Page')"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a th:replace="fragments/paging :: paging(${totalPages}, '>>', 'Last Page')"></a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnClear").on("click", function (e) {
+            e.preventDefault();
+            $("#keyword").text("");
+            window.location = "[[@{/}]]";
+        });
+    });
+
+    function changePageSize() {
+        $("#searchForm").submit();
+    }
+</script>
+</body>
+
+</html>
